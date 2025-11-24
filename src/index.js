@@ -4,10 +4,10 @@ const PORT = 3000;
 import { randomUUID } from "node:crypto";
 app.use(express.json());
 
-const snacksStorage = [
-  { id: 1, name: "cheezit", price: 4.99, tags: ["crackers", "cheese snack"] },
-  { id: 2, name: "Pringles", price: 2.49, tags: ["potato", "flavored crisp"] },
-  { id: 3, name: "cakes", price: 4.49, tags: ["debbie cakes", "iced buns"] },
+let snacksStorage = [
+  { id: randomUUID(), name: "cheezit", price: 4.99, tags: ["crackers", "cheese snack"] },
+  { id: randomUUID(), name: "Pringles", price: 2.49, tags: ["potato", "flavored crisp"] },
+  { id: randomUUID(), name: "cakes", price: 4.49, tags: ["debbie cakes", "iced buns"] },
 ];
 app.get("/snacks/:id", (req, res) => {
   const { id } = req.params;
@@ -42,10 +42,28 @@ app.post("/snacks", (req, res) => {
     name,
     price,
   };
-
   snacksStorage.push(newSnack);
   res.status(201).json(newSnack);
 });
+
+
+app.delete("/snacks/:id", (req, res) => {
+  const { id } = req.params;
+
+  
+  const snack = snacksStorage.find((s) => String(s.id) === String(id));
+
+  if (!snack) {
+    return res.status(404).json({ error: "Snack not found" });
+  }
+
+  
+  snacksStorage = snacksStorage.filter((s) => String(s.id) !== String(id));
+
+  res.status(200).json({ message: "Snack deleted successfully" });
+});
+
+
 
 app.get("/", (req, res) => {
   res.send("<h1>Hello, express!</h1>");
