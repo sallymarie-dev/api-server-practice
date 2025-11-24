@@ -4,10 +4,38 @@ const PORT = 3000;
 import { randomUUID } from "node:crypto";
 app.use(express.json());
 
+app.use((req, res, next) => {
+  if (req.method === "POST") {
+    console.log(`${req.method} ${req.path}`, req.body);
+  } else {
+    console.log(`${req.method} ${req.path}`);
+  }
+  res.on("finish", () => {
+    console.log(`Response status: ${res.statusCode}`);
+  });
+
+  next();
+});
+
 let snacksStorage = [
-  { id: randomUUID(), name: "cheezit", price: 4.99, tags: ["crackers", "cheese snack"] },
-  { id: randomUUID(), name: "Pringles", price: 2.49, tags: ["potato", "flavored crisp"] },
-  { id: randomUUID(), name: "cakes", price: 4.49, tags: ["debbie cakes", "iced buns"] },
+  {
+    id: randomUUID(),
+    name: "cheezit",
+    price: 4.99,
+    tags: ["crackers", "cheese snack"],
+  },
+  {
+    id: randomUUID(),
+    name: "Pringles",
+    price: 2.49,
+    tags: ["potato", "flavored crisp"],
+  },
+  {
+    id: randomUUID(),
+    name: "cakes",
+    price: 4.49,
+    tags: ["debbie cakes", "iced buns"],
+  },
 ];
 app.get("/snacks/:id", (req, res) => {
   const { id } = req.params;
@@ -46,24 +74,19 @@ app.post("/snacks", (req, res) => {
   res.status(201).json(newSnack);
 });
 
-
 app.delete("/snacks/:id", (req, res) => {
   const { id } = req.params;
 
-  
   const snack = snacksStorage.find((s) => String(s.id) === String(id));
 
   if (!snack) {
     return res.status(404).json({ error: "Snack not found" });
   }
 
-  
   snacksStorage = snacksStorage.filter((s) => String(s.id) !== String(id));
 
   res.status(200).json({ message: "Snack deleted successfully" });
 });
-
-
 
 app.get("/", (req, res) => {
   res.send("<h1>Hello, express!</h1>");
