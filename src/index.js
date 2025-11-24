@@ -1,6 +1,7 @@
 import express from "express";
 const app = express();
 const PORT = 3000;
+//random id 
 import { randomUUID } from "node:crypto";
 app.use(express.json());
 
@@ -65,7 +66,7 @@ app.post("/snacks", (req, res) => {
   if (typeof price !== "number") {
     return res.status(400).json({ error: "Price must be a number" });
   }
-
+//random id
   const newSnack = {
     id: randomUUID(),
     name,
