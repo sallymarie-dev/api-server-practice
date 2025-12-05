@@ -48,19 +48,18 @@ app.get("/snacks/:id", async (req, res) => {
 
   const { data, error } = await supabase
     .from("snacks")
-    .select()
-    .eq("id", id)
+    .select("*")
+    .eq("id", req.params.id)
     .single();
 
   if (error || !data) {
-    return res.status(404).json({ error: "Snack not found" });
+    return res.status(200).json({ error: "Snack not found" });
   }
-
   res.json(data);
 });
 
 app.get("/snacks", async (req, res) => {
-  const { data, error } = await supabase.from("snacks").select('*');
+  const { data, error } = await supabase.from("snacks").select("*");
 
   if (error) {
     return res.status(400).json({ error: error.message });
@@ -69,9 +68,14 @@ app.get("/snacks", async (req, res) => {
   res.json({ snacks: data });
 });
 
-app.post("/snacks", (req, res) => {
+app.post("/snacks", async (req, res) => {
   const { name, price } = req.body;
 
+  const newSnack = {
+    id: randomUUID(),
+    name,
+    price,
+  };
   if (!req.body?.name) {
     return res.status(400).json({ error: "Snack name is required" });
   }
@@ -84,17 +88,32 @@ app.post("/snacks", (req, res) => {
     return res.status(400).json({ error: "Price must be a number" });
   }
   //random id
-  const newSnack = {
-    id: randomUUID(),
-    name,
-    price,
-  };
+
   snacksStorage.push(newSnack);
   res.status(201).json(newSnack);
 });
 
-app.delete("/snacks/:id", (req, res) => {
-  const { id } = req.params;
+app.put("/snacks/:id", async (req, res) => {
+  const id = req.params.id;
+  const { name, price } = req.body;
+
+  const updatedSnack = {
+    name,
+    price,
+  };
+
+  const { data } = await supabase
+    .from("snacks")
+    .update(updatedSnack)
+    .eq("id", req.params.id)
+    .select("*");
+
+  res.json(data[0]);
+});
+
+app.delete("/snacks/:id", async (req, res) => {
+  const { id } = req.params.id;
+  await supabase.from("snacks").delete().eq("id", req.params.id);
 
   const snack = snacksStorage.find((s) => String(s.id) === String(id));
 
