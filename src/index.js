@@ -1,8 +1,12 @@
 import express from "express";
+import { supabase } from "./supabase.js";
+
 const app = express();
 const PORT = 3000;
-//random id 
+
+//random id
 import { randomUUID } from "node:crypto";
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -38,20 +42,33 @@ let snacksStorage = [
     tags: ["debbie cakes", "iced buns"],
   },
 ];
-//level 23 completed 
-app.get("/snacks/:id", (req, res) => {
+//level 23 completed
+app.get("/snacks/:id", async (req, res) => {
   const { id } = req.params;
-  const snack = snacksStorage.find((snack) => snack.id === id);
-  if (!snack) {
+
+  const { data, error } = await supabase
+    .from("snacks")
+    .select()
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
     return res.status(404).json({ error: "Snack not found" });
   }
-  res.json(snack);
+
+  res.json(data);
 });
-app.get("/snacks", (req, res) => {
-  res.json({
-    snacks: snacksStorage,
-  });
+
+app.get("/snacks", async (req, res) => {
+  const { data, error } = await supabase.from("snacks").select('*');
+
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  res.json({ snacks: data });
 });
+
 app.post("/snacks", (req, res) => {
   const { name, price } = req.body;
 
@@ -66,7 +83,7 @@ app.post("/snacks", (req, res) => {
   if (typeof price !== "number") {
     return res.status(400).json({ error: "Price must be a number" });
   }
-//random id
+  //random id
   const newSnack = {
     id: randomUUID(),
     name,
