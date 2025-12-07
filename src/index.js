@@ -93,31 +93,7 @@ app.post("/snacks", async (req, res) => {
   res.status(201).json(newSnack);
 });
 
-app.put("/snacks/:id", async (req, res) => {
-  const id = req.params.id;
-  const { name, price } = req.body;
 
-  const updatedSnack = {
-    name,
-    price,
-  };
-
-  const { data } = await supabase
-    .from("snacks")
-    .update(updatedSnack)
-    .eq("id", req.params.id)
-    .select()
-    .single();
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
-
-  if (!data) {
-    return res.status(404).json({ error: "Snack not found" });
-  }
-
-  res.json(data[0]);
-});
 
 app.delete("/snacks/:id", async (req, res) => {
   const { id } = req.params.id;
