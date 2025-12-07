@@ -106,7 +106,7 @@ app.put("/snacks/:id", async (req, res) => {
     .from("snacks")
     .update(updatedSnack)
     .eq("id", req.params.id)
-    .select("*");
+    .select();
 
   res.json(data[0]);
 });
