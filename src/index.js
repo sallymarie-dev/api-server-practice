@@ -106,7 +106,15 @@ app.put("/snacks/:id", async (req, res) => {
     .from("snacks")
     .update(updatedSnack)
     .eq("id", req.params.id)
-    .select();
+    .select()
+    .single();
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  if (!data) {
+    return res.status(404).json({ error: "Snack not found" });
+  }
 
   res.json(data[0]);
 });
