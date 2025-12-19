@@ -71,27 +71,34 @@ app.get("/snacks", async (req, res) => {
 app.post("/snacks", async (req, res) => {
   const { name, price } = req.body;
 
-  const newSnack = {
-    id: randomUUID(),
-    name,
-    price,
-  };
-  if (!req.body?.name) {
+  if (!name) {
     return res.status(400).json({ error: "Snack name is required" });
   }
 
-  if (!req.body?.price && req.body?.price !== 0) {
+  if (price === undefined) {
     return res.status(400).json({ error: "Snack price is required" });
   }
 
   if (typeof price !== "number") {
     return res.status(400).json({ error: "Price must be a number" });
   }
-  //random id
 
-  snacksStorage.push(newSnack);
-  res.status(201).json(newSnack);
+  const { data, error } = await supabase
+    .from("snacks")
+    .insert([{ name, price }])
+    .select()
+    .single();
+
+  if (error) {
+    return res.status(400).json({
+      error: "Supabase insert failed",
+      details: error.message
+    });
+  }
+
+  res.status(201).json(data);
 });
+
 
 app.put("/snacks/:id", async (req, res) => {
   const id = req.params.id;
